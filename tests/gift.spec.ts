@@ -158,6 +158,9 @@ test("WebGL absence preserves the static sculpture and personal note", async ({
   );
   await expect(page.getByText(gift.note, { exact: true })).toBeVisible();
   await expect(page.locator(".fallback-art")).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Pause animation" }),
+  ).toBeHidden();
   const bounds = await page.locator(".fallback-art").evaluate((svg) => {
     const box = (svg as SVGGraphicsElement).getBBox();
     return {
@@ -186,9 +189,7 @@ test("context loss switches to a deliberate fallback", async ({ page }) => {
   await expect(page.getByText(gift.note, { exact: true })).toBeVisible();
 });
 
-test("phone layouts stay within the viewport and accept touch interactions", async ({
-  page,
-}) => {
+test("narrow layouts stay within the viewport", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto("./");
   await fillGift(page);
@@ -378,8 +379,13 @@ test("paused motion retains the correct accessible action across preview", async
 test("a copied production link preserves the repository path and opens the intended gift", async ({
   page,
   context,
+  browserName,
 }) => {
-  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await context.grantPermissions(
+    browserName === "webkit"
+      ? ["clipboard-read"]
+      : ["clipboard-read", "clipboard-write"],
+  );
   await page.goto("./?old-query=ignored");
   await fillGift(page);
   await page.getByRole("button", { name: "Create gift link" }).click();
@@ -392,4 +398,149 @@ test("a copied production link preserves the repository path and opens the inten
   await recipient.getByRole("button", { name: "Open your gift" }).click();
   await expect(recipient.getByText(gift.note, { exact: true })).toBeVisible();
   await expect(recipient.getByLabel("Their name")).toHaveCount(0);
+});
+
+test("Back from a damaged gift restores the creator and its draft", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await fillGift(page);
+  await page.evaluate(() => {
+    location.hash = "gift=damaged!!!";
+  });
+  await expect(
+    page.getByRole("heading", { name: "This gift needs a little help." }),
+  ).toBeVisible();
+  await page.goBack();
+  await expect(page.getByLabel("Their name")).toHaveValue(gift.to);
+  await expect(page.getByLabel("Your note")).toHaveValue(gift.note);
+});
+
+test("browser Back and Forward navigate preview without losing the draft", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await fillGift(page);
+  await page.getByRole("button", { name: "Preview gift" }).click();
+  await page.goBack();
+  await expect(page.getByLabel("Your note")).toHaveValue(gift.note);
+  await expect(
+    page.getByRole("button", { name: "Preview gift" }),
+  ).toBeFocused();
+  await page.goForward();
+  await expect(
+    page.getByRole("heading", { name: `${gift.to}, this is for you.` }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Back to editing" }).click();
+  await expect(page.getByLabel("Their name")).toHaveValue(gift.to);
+});
+
+test("making a new gift preserves the received gift in browser history", async ({
+  page,
+}) => {
+  await page.goto("./#" + encodeGift(gift));
+  const receivedUrl = page.url();
+  await page.getByRole("button", { name: "Make a gift for someone" }).click();
+  await expect(page.getByLabel("Their name")).toBeVisible();
+  await page.goBack();
+  expect(page.url()).toBe(receivedUrl);
+  await expect(
+    page.getByRole("heading", { name: `${gift.to}, this is for you.` }),
+  ).toBeVisible();
+});
+
+test("preview validation moves keyboard focus to the missing field", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await page.getByRole("button", { name: "Preview gift" }).click();
+  await expect(page.getByLabel("Their name")).toBeFocused();
+  await page.getByLabel("Their name").fill(gift.to);
+  await page.getByRole("button", { name: "Preview gift" }).click();
+  await expect(page.getByLabel("Your name")).toBeFocused();
+});
+
+test("touch users can preview, open, replay and return to their note", async ({
+  browser,
+  baseURL,
+}) => {
+  const context = await browser.newContext({
+    baseURL,
+    hasTouch: true,
+    isMobile: true,
+    viewport: { width: 390, height: 844 },
+  });
+  try {
+    const page = await context.newPage();
+    await page.goto("./");
+    await fillGift(page);
+    await page.getByRole("button", { name: "Preview gift" }).tap();
+    await page.getByRole("button", { name: "Open your gift" }).tap();
+    await expect(page.getByText(gift.note, { exact: true })).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.getByRole("button", { name: "Replay the reveal" }).tap();
+    await expect(
+      page.getByRole("button", { name: "Open your gift" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Back to editing" }).tap();
+    await expect(page.getByLabel("Your note")).toHaveValue(gift.note);
+  } finally {
+    await context.close();
+  }
+});
+
+test("reloading a preview does not trap the next preview in browser history", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await fillGift(page);
+  await page.getByRole("button", { name: "Preview gift" }).click();
+  await page.reload();
+  await fillGift(page);
+  await page.getByRole("button", { name: "Preview gift" }).click();
+  await page.getByRole("button", { name: "Back to editing" }).click();
+  await expect(page.getByLabel("Your note")).toHaveValue(gift.note);
+});
+
+test("invalid Forward preview recovers without leaving a stale history marker", async ({
+  page,
+}) => {
+  await page.goto("./");
+  await fillGift(page);
+  await page.getByRole("button", { name: "Preview gift" }).click();
+  await page.getByRole("button", { name: "Back to editing" }).click();
+  await page.getByLabel("Your note").fill("");
+  await page.goForward();
+  await expect(page.getByLabel("Your note")).toHaveValue("");
+  await page.getByLabel("Your note").fill(gift.note);
+  await page.getByRole("button", { name: "Preview gift" }).click();
+  await page.getByRole("button", { name: "Back to editing" }).click();
+  await expect(page.getByLabel("Your note")).toHaveValue(gift.note);
+});
+
+test("the reveal completes on elapsed time when frames are slow", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    window.requestAnimationFrame = (callback) =>
+      window.setTimeout(() => callback(performance.now()), 300);
+    window.cancelAnimationFrame = (id) => window.clearTimeout(id);
+  });
+  await page.goto("./#" + encodeGift(gift));
+  await expect(page.locator(".sculpture")).toHaveAttribute(
+    "data-renderer",
+    "webgl",
+  );
+  await page.getByRole("button", { name: "Open your gift" }).click();
+  await expect
+    .poll(
+      async () =>
+        Number(await page.locator(".sculpture").getAttribute("data-progress")),
+      { timeout: 6000 },
+    )
+    .toBe(1);
 });

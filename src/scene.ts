@@ -164,7 +164,7 @@ export function createSculpture(
       paused
     )
       return;
-    const dt = previous ? Math.min((now - previous) / 1000, 0.1) : 0;
+    const dt = previous ? (now - previous) / 1000 : 0;
     previous = now;
     elapsed += dt;
     const target = state === "waiting" ? 0.01 : 1;

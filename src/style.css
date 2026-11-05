@@ -140,6 +140,10 @@ textarea {
   background: #8d7d95;
   box-shadow: none;
 }
+#app:has(.sculpture[data-renderer="fallback"]) .motion-button,
+#app:has(.error-page) .motion-button {
+  display: none;
+}
 .header-create {
   font-size: 13px;
   padding: 12px 0 12px 20px;

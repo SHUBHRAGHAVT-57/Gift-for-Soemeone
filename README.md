@@ -2,6 +2,8 @@
 
 A little universe for someone you love. Create a particle rose or diamond ring, add a personal note, and send a link that opens into a gift.
 
+[Open For You](https://shubhraghavt-57.github.io/Gift-for-Soemeone/)
+
 The rose is for everyday love. The ring is explicitly a proposal theme. Both are procedural 3D point sculptures, rather than embedded videos. The recipient opens the reveal, reads the note, and can replay it.
 
 ## Run locally
@@ -64,23 +66,23 @@ The deployment workflow is **manual** so adding the source to a repository does 
 ```sh
 npm test
 npm run build
-npx playwright install chromium
+npx playwright install chromium webkit
 npm run test:e2e
 ```
 
-Browser tests build and serve the production output under `/Gift-for-Soemeone/`, exercising the actual GitHub repository subpath. They cover creation, preview, replay, Unicode notes, safe text rendering, malformed links, copying, native-share cancellation, both WebGL sculptures, delayed module loading, reduced motion, pause/resume, graphics fallback, context loss, and narrow layouts. CI runs these checks on pushes and pull requests.
+Browser tests build and serve the production output under `/Gift-for-Soemeone/`, exercising the actual GitHub repository subpath in Chromium and WebKit. They cover creation, preview, replay, Back/Forward navigation, preview reload recovery, Unicode notes, safe text rendering, malformed links, copying, native-share cancellation, both WebGL sculptures, delayed module loading, slow frames, reduced motion, pause/resume, graphics fallback, context loss, narrow layouts and emulated touch interactions. CI runs both browsers on pushes and pull requests.
 
-If you already have a compatible Chromium executable, set `PLAYWRIGHT_EXECUTABLE_PATH` instead of downloading another browser. Do not commit a machine-specific path.
+If you already have a compatible Chromium executable, set `PLAYWRIGHT_EXECUTABLE_PATH` instead of downloading that browser; the override applies only to the Chromium project. WebKit uses its own Playwright installation. Do not commit a machine-specific path.
 
 ## Accessibility and rendering
 
 - Meaningful content and controls use HTML; the canvas is decorative.
-- Labeled form controls, visible keyboard focus, a skip link, keyboard-operable reveals and focus restoration on returning to editing.
+- Labeled form controls, visible keyboard focus, a skip link, keyboard-operable reveals and focus restoration on returning to editing. Missing required fields receive focus when previewing; length errors identify the affected name or note.
 - Reduced-motion preferences stop continuous motion and show the completed sculpture. A manual motion control also pauses animation.
 - Static SVG illustrations retain the gift's meaning when WebGL is unavailable or its context is lost.
-- Geometry is created once. Gathering runs in a shader; pixel ratio and particle counts are capped. Rendering pauses when the tab or sculpture is hidden and resources are disposed on view changes.
+- Geometry is created once. Gathering runs in a shader; pixel ratio and particle counts are capped. Reveal progress follows elapsed time, so low frame rates do not artificially stretch the animation. Rendering pauses when the tab or sculpture is hidden and resources are disposed on view changes.
 
-Headless Chromium checks do not certify physical-phone frame rates, battery consumption, Safari behavior, or every messaging app's handling of long links. The recordings inspired the geometry and reveal; this is not an exact frame-by-frame recreation.
+Headless Chromium and WebKit checks do not certify physical-phone frame rates, battery consumption, actual iOS Safari behavior, or every messaging app's handling of long links. The recordings inspired the geometry and reveal; this is not an exact frame-by-frame recreation.
 
 ## Source map
 

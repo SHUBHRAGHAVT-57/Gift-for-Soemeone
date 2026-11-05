@@ -10,12 +10,23 @@ export default defineConfig({
   use: {
     baseURL: "http://127.0.0.1:4174/Gift-for-Soemeone/",
     trace: "retain-on-failure",
-    launchOptions: { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH },
   },
   webServer: {
-    command: "npm run preview -- --port 4174 --strictPort --base /Gift-for-Soemeone/",
+    command:
+      "npm run preview -- --port 4174 --strictPort --base /Gift-for-Soemeone/",
     url: "http://127.0.0.1:4174/Gift-for-Soemeone/",
     reuseExistingServer: !process.env.CI,
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        launchOptions: {
+          executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH,
+        },
+      },
+    },
+    { name: "webkit", use: { ...devices["Desktop Safari"] } },
+  ],
 });

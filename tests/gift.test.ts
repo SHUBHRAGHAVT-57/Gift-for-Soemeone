@@ -75,3 +75,29 @@ test("links keep a GitHub Pages subpath and drop unrelated search/hash", () => {
   assert.deepEqual(decodeGift(url.hash), gift);
   assert.throws(() => giftUrl(gift, "javascript:alert(1)"));
 });
+
+test("validation identifies which name needs attention", () => {
+  assert.throws(
+    () => validateGift({ ...gift, to: "x".repeat(61) }),
+    /Their name/,
+  );
+  assert.throws(
+    () => validateGift({ ...gift, from: "x".repeat(61) }),
+    /Your name/,
+  );
+  assert.throws(
+    () => validateGift({ ...gift, note: "x".repeat(601) }),
+    /Your note/,
+  );
+});
+
+test("unsupported characters get a useful error instead of a misleading length error", () => {
+  assert.throws(
+    () => validateGift({ ...gift, note: "Hello\u0001love" }),
+    /control characters/,
+  );
+  assert.throws(
+    () => validateGift({ ...gift, to: "Maya\u0000" }),
+    /control characters/,
+  );
+});

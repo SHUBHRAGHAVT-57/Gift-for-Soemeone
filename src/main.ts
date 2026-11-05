@@ -8,8 +8,7 @@ const app = document.querySelector<HTMLDivElement>("#app")!;
 let scene: Sculpture | undefined;
 let sceneToken = 0;
 let paused = false;
-let currentGift: Gift | undefined;
-let isPreview = false;
+let view: "creator" | "gift" | "preview" | "error" = "creator";
 let draft = { to: "", from: "", note: "", theme: "rose" as Theme };
 let renderToken = 0;
 let sceneState: SceneState = "display";
@@ -102,10 +101,11 @@ function clearScene() {
 }
 
 function renderCreator(focusPreview = false) {
+  if (history.state?.preview === true)
+    history.replaceState(null, "", location.href);
   ++renderToken;
   clearScene();
-  currentGift = undefined;
-  isPreview = false;
+  view = "creator";
   document.title = "For You — a little universe, just for them";
   app.innerHTML = /* HTML */ `${header()}
     <main id="main">
@@ -349,6 +349,7 @@ function renderCreator(focusPreview = false) {
   $("#preview").addEventListener("click", () => {
     const gift = validatedDraft();
     if (gift) {
+      history.pushState({ preview: true }, "", location.href);
       renderRecipient(gift, true);
       window.scrollTo(0, 0);
     }
@@ -398,6 +399,7 @@ function readDraft() {
 }
 
 function validatedDraft(): Gift | undefined {
+  if (!$<HTMLFormElement>("#gift-form").reportValidity()) return undefined;
   readDraft();
   try {
     const gift = validateGift({ v: 1, ...draft });
@@ -438,8 +440,7 @@ async function shareLink() {
 function renderRecipient(gift: Gift, preview = false) {
   ++renderToken;
   clearScene();
-  currentGift = gift;
-  isPreview = preview;
+  view = preview ? "preview" : "gift";
   document.title = "For You — someone made you a little universe";
   app.innerHTML = /* HTML */ `${header(true)}
     <main class="recipient" id="main">
@@ -486,7 +487,6 @@ function renderRecipient(gift: Gift, preview = false) {
   wireHeader();
   void mountScene(gift.theme, "waiting");
   $(".open-gift").addEventListener("click", () => {
-    $(".recipient").classList.add("is-open");
     $(".open-controls").hidden = true;
     $(".letter").hidden = false;
     sceneState = "opened";
@@ -496,7 +496,6 @@ function renderRecipient(gift: Gift, preview = false) {
     note.focus({ preventScroll: true });
   });
   $(".replay-button").addEventListener("click", () => {
-    $(".recipient").classList.remove("is-open");
     $(".letter").hidden = true;
     $(".open-controls").hidden = false;
     sceneState = "waiting";
@@ -504,13 +503,13 @@ function renderRecipient(gift: Gift, preview = false) {
     $(".open-gift").focus({ preventScroll: true });
   });
   if (preview)
-    $(".back-button").addEventListener("click", () => renderCreator(true));
+    $(".back-button").addEventListener("click", () => history.back());
   $(".make-your-own").addEventListener("click", goToCreator);
   $("#gift-title").focus({ preventScroll: true });
 }
 
 function goToCreator() {
-  history.replaceState(null, "", location.pathname + location.search);
+  history.pushState(null, "", location.pathname + location.search);
   renderCreator();
   window.scrollTo(0, 0);
 }
@@ -518,7 +517,7 @@ function goToCreator() {
 function route() {
   const hash = location.hash;
   if (!hash.startsWith("#gift=")) {
-    renderCreator();
+    renderCreator(view === "preview");
     return;
   }
   try {
@@ -526,8 +525,7 @@ function route() {
   } catch {
     ++renderToken;
     clearScene();
-    currentGift = undefined;
-    isPreview = false;
+    view = "error";
     app.innerHTML = /* HTML */ `${header(true)}
       <main id="main" class="error-page">
         ${flowerMark}
@@ -547,7 +545,18 @@ function route() {
 
 window.addEventListener("hashchange", () => {
   // In-page creator anchors must not rebuild the form and discard a draft.
-  if (location.hash.startsWith("#gift=") || (currentGift && !isPreview))
+  if (location.hash.startsWith("#gift=") || view === "gift" || view === "error")
     route();
+});
+window.addEventListener("popstate", (event) => {
+  if (event.state?.preview === true) {
+    try {
+      renderRecipient(validateGift({ v: 1, ...draft }), true);
+    } catch {
+      route();
+    }
+  } else if (view === "preview") {
+    route();
+  }
 });
 route();

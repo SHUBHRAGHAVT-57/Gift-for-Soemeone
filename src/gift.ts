@@ -27,14 +27,15 @@ export function validateGift(value: unknown): Gift {
     if (typeof raw !== "string")
       throw new Error("Please add a name and a personal note.");
     const normalized = raw.trim();
-    if (
-      !normalized ||
-      [...normalized].length > limit ||
-      /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/u.test(normalized)
-    ) {
+    const label =
+      key === "note" ? "Your note" : key === "to" ? "Their name" : "Your name";
+    if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/u.test(normalized)) {
       throw new Error(
-        `${key === "note" ? "Your note" : "Each name"} must be between 1 and ${limit} characters.`,
+        `${label} contains unsupported control characters. Remove them and try again.`,
       );
+    }
+    if (!normalized || [...normalized].length > limit) {
+      throw new Error(`${label} must be between 1 and ${limit} characters.`);
     }
     return normalized;
   };
