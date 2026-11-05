@@ -1,0 +1,29 @@
+{
+  "name": "for-you",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A little universe for someone you love. Create and share a personal particle rose or diamond ring.",
+  "scripts": {
+    "dev": "vite --configLoader native --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build --configLoader native",
+    "preview": "vite preview --configLoader native --host 127.0.0.1",
+    "test": "node --experimental-strip-types --test tests/gift.test.ts tests/shapes.test.ts",
+    "test:e2e": "npm run build && playwright test"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "dependencies": {
+    "three": "0.180.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0",
+    "@types/three": "0.180.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.7"
+  },
+  "allowScripts": {
+    "esbuild": true
+  }
+}
