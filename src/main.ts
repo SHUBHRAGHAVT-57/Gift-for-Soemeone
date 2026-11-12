@@ -146,7 +146,7 @@ function renderCreator(focusPreview = false) {
         aria-labelledby="compose-title"
       >
         <div class="compose-intro">
-          <span class="little-flower" aria-hidden="true">✳</span>
+          <span class="little-flower" aria-hidden="true">${flowerMark}</span>
           <h2 id="compose-title">Make it<br />theirs.</h2>
           <p>
             A name. A few honest words.<br />
@@ -230,7 +230,7 @@ function renderCreator(focusPreview = false) {
               />
             </div>
           </div>
-          <span class="sr-only" id="name-hint"
+          <span class="name-hint" id="name-hint"
             >Up to 60 characters per name.</span
           >
           <div class="field note-field">
@@ -276,7 +276,7 @@ function renderCreator(focusPreview = false) {
             </button>
           </div>
           <div class="share-result" id="share-result" hidden>
-            <label for="gift-link">Your gift link</label>
+            <div class="share-heading"><label for="gift-link">Your gift link</label><a class="open-link" id="open-link" target="_blank" rel="noopener">Open gift ${arrow}<span class="sr-only"> in a new tab</span></a></div>
             <div class="link-row">
               <input id="gift-link" readonly spellcheck="false" /><button
                 type="button"
@@ -422,6 +422,7 @@ async function shareLink() {
   const token = renderToken;
   const field = $<HTMLInputElement>("#gift-link");
   field.value = url;
+  $("#open-link").setAttribute("href", url);
   $("#share-result").hidden = false;
   try {
     if (!navigator.clipboard?.writeText)
