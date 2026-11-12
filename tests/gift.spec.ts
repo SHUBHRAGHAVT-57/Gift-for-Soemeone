@@ -311,6 +311,9 @@ test("pausing and reduced motion stop frame scheduling", async ({ page }) => {
   await page.getByRole("button", { name: "Resume animation" }).click();
   await expect.poll(getFrames).toBeGreaterThan(paused);
   await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect
+    .poll(() => page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches))
+    .toBe(true);
   await expect(page.locator(".sculpture")).toHaveAttribute(
     "data-motion",
     "reduced",
@@ -543,4 +546,21 @@ test("the reveal completes on elapsed time when frames are slow", async ({
       { timeout: 6000 },
     )
     .toBe(1);
+});
+
+test("generated gift can be opened directly and invalidated when the draft changes", async ({ page, context }) => {
+  await page.goto("./");
+  await fillGift(page);
+  await expect(page.getByRole("link", { name: "Open gift" })).toBeHidden();
+  await page.getByRole("button", { name: "Create gift link" }).click();
+  const link = page.getByRole("link", { name: "Open gift" });
+  await expect(link).toHaveAttribute("href", await page.getByLabel("Your gift link").inputValue());
+  const popupPromise = context.waitForEvent("page");
+  await link.click();
+  const recipient = await popupPromise;
+  await expect(recipient.locator("#gift-title")).toContainText(gift.to);
+  await recipient.getByRole("button", { name: "Open your gift" }).click();
+  await expect(recipient.locator(".personal-note")).toHaveText(gift.note);
+  await page.getByLabel("Your note").fill("A changed note");
+  await expect(link).toBeHidden();
 });

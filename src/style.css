@@ -183,7 +183,7 @@ p {
     400 clamp(52px, 5.45vw, 80px)/1.06 Georgia,
     "Times New Roman",
     serif;
-  letter-spacing: -3.6px;
+  letter-spacing: -0.035em;
   margin-bottom: 28px;
 }
 .hero-description {
@@ -343,7 +343,7 @@ p {
   font:
     400 62px/0.99 Georgia,
     serif;
-  letter-spacing: -2.5px;
+  letter-spacing: -0.035em;
   margin-bottom: 24px;
 }
 .compose-intro > p {
@@ -886,7 +886,7 @@ footer > a:last-child svg {
   }
   .hero h1 {
     font-size: 58px;
-    letter-spacing: -2.8px;
+    letter-spacing: -0.035em;
   }
   .hero-copy {
     padding-top: 65px;
@@ -964,7 +964,7 @@ footer > a:last-child svg {
   }
   .hero h1 {
     font-size: clamp(43px, 9.7vw, 66px);
-    letter-spacing: -2.3px;
+    letter-spacing: -0.035em;
     margin-bottom: 22px;
   }
   .hero-description {
@@ -1024,7 +1024,7 @@ footer > a:last-child svg {
   .compose-intro h2 {
     font-size: 46px;
     line-height: 1.1;
-    letter-spacing: -2px;
+    letter-spacing: -0.03em;
     margin-bottom: 13px;
   }
   .compose-intro > p {
@@ -1192,4 +1192,47 @@ footer > a:last-child svg {
   .motion-button {
     display: none;
   }
+}
+
+/* The editor reads like stationery; functional text stays comfortably legible. */
+:root { scrollbar-color: #927084 var(--night); }
+input, textarea { caret-color: #80516a; }
+.hero h1, .compose-intro h2 { text-wrap: balance; }
+.little-flower { width: 34px; height: 42px; }
+.little-flower svg { width: 100%; height: 100%; }
+.theme-picker legend, .field > label { font-size: 14px; }
+.theme-option strong { font-size: 14px; }
+.theme-option small { font-size: 12px; color: #695365; }
+.field input, .field textarea { font-size: 16px; background: #fffaf3; }
+.field input { height: 52px; }
+.field input::placeholder, .field textarea::placeholder { color: #796373; font-size: 14px; }
+.field > label > span, .note-count, .name-hint { font-size: 12px; color: #695365; }
+.name-fields { margin-bottom: 9px; }
+.name-hint { display: block; margin-bottom: 26px; line-height: 1.5; }
+.privacy-note { font-size: 12px; color: #695365; }
+.share-status { font-size: 14px; }
+.share-result { border-top: 1px solid #cbbacb; padding-top: 24px; }
+.share-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+.share-heading label { font-size: 14px; font-weight: 600; }
+.open-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 13px; text-decoration: underline; text-underline-offset: 4px; }
+.open-link svg { width: 17px; height: 17px; }
+.link-row input { min-height: 48px; font-size: 14px; }
+.copy-again, .preview-button, .share-button { font-size: 13px; }
+@media (max-width: 720px) {
+  .compose-section { padding: 42px 7% 40px; }
+  .compose-intro > p { font-size: 14px; }
+  .theme-options { grid-template-columns: 1fr; gap: 10px; }
+  .theme-option { min-height: 74px; padding: 14px 16px; gap: 14px; }
+  .theme-option strong { font-size: 14px; }
+  .theme-option small { font-size: 12px; }
+  .name-fields { grid-template-columns: 1fr; gap: 22px; }
+  .field > label { font-size: 14px; }
+  .field > label > span { font-size: 11px; }
+  .field textarea { min-height: 190px; padding: 14px 14px 38px; }
+  .form-actions { gap: 10px 20px; }
+  .form-actions .button { width: 100%; font-size: 14px; justify-content: space-between; padding-inline: 20px; }
+  .preview-button, .share-button { min-height: 48px; }
+  .privacy-note { font-size: 12px; margin-top: 16px; }
+  .link-row { align-items: stretch; flex-direction: column; gap: 5px; }
+  .copy-again { align-self: flex-start; }
 }
