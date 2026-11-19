@@ -48,7 +48,7 @@ async function mountScene(theme: Theme, state: SceneState) {
 }
 
 function header(recipient = false): string {
-  return /* HTML */ `<a class="skip-link" href="#main">Skip to content</a>
+  return /* HTML */ `<a class="skip-link" href="#main" tabindex="0">Skip to content</a>
     <header class="header">
       <a class="brand" href="./" aria-label="For You home"
         >${flowerMark}<span>for you<span class="brand-dot">.</span></span></a

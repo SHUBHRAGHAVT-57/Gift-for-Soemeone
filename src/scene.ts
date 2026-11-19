@@ -82,6 +82,8 @@ export function createSculpture(
       alpha: true,
       antialias: false,
       powerPreference: "low-power",
+      // Retain the single reduced-motion frame for WebKit's compositor.
+      preserveDrawingBuffer: motion.matches,
     });
     if (!context) {
       host.dataset.renderer = "fallback";

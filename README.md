@@ -1,8 +1,14 @@
 # For You
 
-A little universe for someone you love. Create a particle rose or diamond ring, add a personal note, and send a link that opens into a gift.
+Create a personal particle rose or proposal ring in your browser, preview the recipient's reveal, and share it with one link. No account or backend required.
 
 [Open For You](https://shubhraghavt-57.github.io/Gift-for-Soemeone/)
+
+[Watch the short walkthrough](docs/media/walkthrough.webm) · [Engineering decisions](docs/ENGINEERING.md) · [Verification and limits](docs/verification.md)
+
+![Desktop creator showing the procedural particle rose](docs/media/desktop-chromium-creator.png)
+
+The screenshots and walkthrough show the local production build with synthetic sample names and notes. [Phone creator](docs/media/phone-webkit-creator.png) · [Phone reveal](docs/media/phone-webkit-reveal.png) · [Graphics fallback](docs/media/phone-webkit-fallback.png).
 
 The rose is for everyday love. The ring is explicitly a proposal theme. Both are procedural 3D point sculptures, rather than embedded videos. The recipient opens the reveal, reads the note, and can replay it.
 
@@ -70,7 +76,15 @@ npx playwright install chromium webkit
 npm run test:e2e
 ```
 
-Browser tests build and serve the production output under `/Gift-for-Soemeone/`, exercising the actual GitHub repository subpath in Chromium and WebKit. They cover creation, preview, replay, Back/Forward navigation, preview reload recovery, Unicode notes, safe text rendering, malformed links, copying, native-share cancellation, both WebGL sculptures, delayed module loading, slow frames, reduced motion, pause/resume, graphics fallback, context loss, narrow layouts and emulated touch interactions. CI runs both browsers on pushes and pull requests.
+Browser tests build and serve the production output under `/Gift-for-Soemeone/`, exercising the GitHub repository subpath in Chromium and WebKit. They cover creation, preview, replay, Back/Forward navigation, preview reload recovery, Unicode notes, safe text rendering, malformed links, copying, native-share cancellation, both WebGL sculptures, delayed or failed graphics downloads, slow frames, the first reduced-motion rose frame, pause/resume, graphics fallback, context loss, narrow layouts and emulated touch interactions. CI is configured to run both browsers on pushes and pull requests.
+
+Tests use port **4403**. To regenerate the screenshots and short recording, keep a production preview running on that port, then run `npm run capture:evidence` in a second terminal:
+
+```sh
+npm run preview -- --port 4403 --strictPort --base /Gift-for-Soemeone/
+```
+
+The capture checks desktop Chromium and phone-sized WebKit, reduced motion, keyboard reveal focus, both themes, draft return, generated links and context loss. Its JSON record includes viewport widths, renderer states, external request origins and measured build bytes. The separate walkthrough uses ordinary motion. It requires the matching Playwright browsers and bundled video encoder.
 
 If you already have a compatible Chromium executable, set `PLAYWRIGHT_EXECUTABLE_PATH` instead of downloading that browser; the override applies only to the Chromium project. WebKit uses its own Playwright installation. Do not commit a machine-specific path.
 
@@ -96,4 +110,8 @@ Headless Chromium and WebKit checks do not certify physical-phone frame rates, b
 | `src/style.css` | Responsive layout, typography and interaction styling                  |
 | `tests/`        | Pure behavior tests and browser journeys                               |
 
-See `docs/verification.md` for the checks actually run in the implementation environment.
+See [verification](docs/verification.md) for checks actually run in the implementation environment, [engineering decisions](docs/ENGINEERING.md) for the tradeoffs, and [change history](CHANGELOG.md) for the finish scope.
+
+## License and provenance
+
+Original project code and documentation are available under [MIT](LICENSE), within the copyright holders' rights. Dependencies retain their own terms; [third-party notices](THIRD_PARTY_NOTICES.md) are included with the built site. Received personal notes and external reference recordings are not relicensed by this repository. This project includes AI-assisted implementation and review; the evidence does not claim physical-device performance or user outcomes.

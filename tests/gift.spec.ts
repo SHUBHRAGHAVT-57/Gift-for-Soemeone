@@ -564,3 +564,79 @@ test("generated gift can be opened directly and invalidated when the draft chang
   await page.getByLabel("Your note").fill("A changed note");
   await expect(link).toBeHidden();
 });
+
+test("keyboard users can compose, preview, open and replay without a pointer", async ({ page }) => {
+  await page.goto("./");
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "Skip to content" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#main")).toBeFocused();
+  for (let tabs = 0; tabs < 12; tabs++) {
+    await page.keyboard.press("Tab");
+    if (await page.getByLabel("Their name").evaluate((field) => field === document.activeElement)) break;
+  }
+  await expect(page.getByLabel("Their name")).toBeFocused();
+  await page.keyboard.insertText(gift.to);
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("Your name")).toBeFocused();
+  await page.keyboard.insertText(gift.from);
+  await page.keyboard.press("Tab");
+  await expect(page.getByLabel("Your note")).toBeFocused();
+  await page.keyboard.insertText(gift.note);
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "Preview gift" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#gift-title")).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "Open your gift" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".personal-note")).toBeFocused();
+  await expect(page.locator(".personal-note")).toHaveText(gift.note);
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("button", { name: "Replay the reveal" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("button", { name: "Open your gift" })).toBeFocused();
+});
+
+test("a failed graphics download retains the ring illustration and Unicode note", async ({ page }) => {
+  await page.route("**/assets/scene-*.js", (route) => route.abort());
+  await page.goto("./#" + encodeGift({ ...gift, theme: "ring" }));
+  await expect(page.locator(".sculpture")).toHaveAttribute("data-renderer", "fallback");
+  await expect(page.locator(".sculpture")).toHaveAttribute("data-theme", "ring");
+  await expect(page.locator(".fallback-art")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Pause animation" })).toBeHidden();
+  await page.getByRole("button", { name: "Open your gift" }).click();
+  await expect(page.locator(".personal-note")).toHaveText(gift.note);
+  await page.getByRole("button", { name: "Replay the reveal" }).click();
+  await expect(page.getByRole("button", { name: "Open your gift" })).toBeVisible();
+});
+
+test("the initial phone rose is visible with reduced motion", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("./");
+  await expect(page.locator(".sculpture")).toHaveAttribute("data-renderer", "webgl");
+  const screenshot = await page.locator(".sculpture canvas").screenshot();
+  const rosePixels = await page.evaluate(async (base64) => {
+    const picture = new Image();
+    picture.src = `data:image/png;base64,${base64}`;
+    await picture.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = picture.width;
+    canvas.height = picture.height;
+    const context = canvas.getContext("2d")!;
+    context.drawImage(picture, 0, 0);
+    const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
+    let petals = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      if (
+        data[i] > 90 &&
+        data[i] > data[i + 1] * 1.4 &&
+        data[i] > data[i + 2] * 1.1
+      ) petals++;
+    }
+    return petals;
+  }, screenshot.toString("base64"));
+  expect(rosePixels).toBeGreaterThan(200);
+});
