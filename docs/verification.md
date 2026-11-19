@@ -1,29 +1,22 @@
 # Local verification
 
-Verified on 5 November 2026. After the initial pause, the user supplied the GitHub repository and repaired npm access; installation, audit, build and tests were rerun successfully.
+The 19 November 2026 finish ran on Windows with Node 24.22.1, npm 11.19.1 and the default Playwright 1.64.0 Chromium and WebKit browsers. Browser tests used the production build at `http://127.0.0.1:4403/Gift-for-Soemeone/`.
 
 | Check | Actual result |
 | --- | --- |
-| `npm test` | 12 passed, 0 failed |
-| `npm run test:e2e` | TypeScript check and Vite production build succeeded; 54 browser tests passed (27 Chromium and 27 WebKit), 0 failed or skipped; exit 0 |
-| Production repository-subpath behavior | Browser journeys ran under `/Gift-for-Soemeone/`; a real copied link preserved the path, removed an unrelated query, and opened the intended gift |
-| Rendering | Both WebGL sculptures rendered visible particles without browser or shader errors |
-| Accessibility and fallbacks | Keyboard opening, skip navigation, required-field focus, field-specific validation, focus restoration, theme/motion labels, reduced motion, pause/resume, WebGL absence and context loss covered; inert motion controls hidden |
-| Personal content and sharing | Unicode round trips, strict payload limits, malformed links, text-only rendering, draft preservation, clipboard fallback, stale-result invalidation and native-share cancellation covered |
-| Responsive inspection | Desktop and phone-width creator/recipient views inspected; 320px and 375px viewport overflow checks passed; real Playwright touch events exercised preview/open/replay/back in both engines |
-| Browser history | Back/Forward, malformed-link recovery, received-gift preservation, reload of preview and invalid Forward-preview recovery covered in both engines |
-| Slow rendering | A 300ms frame-cadence regression test confirmed reveal completion follows elapsed time in both engines; hidden-tab/offscreen pauses remain intact |
-| Static illustration | Corrected fallback rose inspected; its geometry stayed within the SVG viewBox |
-| External requests | Production capture observed only the local origin; no external runtime requests |
-| Clean dependency installation | `npm ci --cache artifacts/npm-clean-cache --no-fund` installed 27 packages from a fresh cache and audited 28 packages successfully |
-| Matching browser setup | Standard Playwright Chromium and WebKit installations completed successfully; the final suite used default browser executables without a custom path |
-| Dependency advisory audit | `npm audit --audit-level=low` succeeded and reported 0 vulnerabilities |
-| Workflow action references | All five pinned GitHub Actions `action.yml` URLs returned HTTP 200 |
+| Unit tests | `npm test` passed 12 of 12. It covers strict gift validation, Unicode data, link construction and deterministic geometry for both sculptures. |
+| TypeScript and production build | `npm run test:e2e` ran the type check and Vite 7.3.7 production build successfully. The built package includes the project license and bundled dependency notices. |
+| Full browser suite | 62 passed, 31 per engine, with zero failures or skips. It covers real clipboard copying and opening under the repository subpath, history, draft restoration, preview, replay, native-share cancellation, narrow layouts and touch emulation. |
+| Reduced-motion first paint | The phone-width WebKit regression detected zero red rose pixels before the drawing-buffer fix. Both engines passed the final check, which inspects the visible screenshot before user interaction. Reduced motion and manual pause also passed frame scheduling checks. |
+| Keyboard and graphics failure | Both engines passed pointer-free compose, skip navigation, preview, open and replay, plus graphics module failure, WebGL absence and simulated context loss. The note and SVG illustration stayed available when graphics failed. |
+| Fresh rendered evidence | 12 screenshots at 1440 × 960 and 390 × 844 reported zero horizontal overflow and zero capture errors. The synthetic gift includes an emoji in the recipient name and Hindi text in the note. The walkthrough records compose, animated reveal, draft return and link creation. |
+| Runtime requests | The local origin was the only request origin observed during capture. |
+| Measured build assets | Main JavaScript 22,015 bytes (7,363 gzip). CSS 17,205 bytes (4,749 gzip). On-demand scene 473,665 bytes (119,458 gzip). |
 
-A fresh code review identified a recipient skip-link failure and incorrect accessible labels after theme and pause state changes. Regression tests failed before the fixes and passed in the final suite. A separate visual check identified misplaced SVG petals in the no-WebGL fallback; the coordinate-system fix was included in the final run.
+See the [desktop creator](media/desktop-chromium-creator.png), [phone creator](media/phone-webkit-creator.png), [phone reveal](media/phone-webkit-reveal.png), [graphics fallback](media/phone-webkit-fallback.png), [8-second walkthrough](media/walkthrough.webm) and [capture measurements](media/capture-results.json).
 
-The local environment used Node 24.22.1 and npm 11.19.1. The earlier run used locally restored dependencies and a browser executable override because network access was blocked. Those limitations were resolved for the final run: a clean registry-backed install succeeded, the standard Playwright browser setup succeeded, and all checks passed without the override. The user's `allowScripts.esbuild` configuration was preserved.
+## Verification boundaries
 
-The follow-up audit reproduced and fixed three browser-history failures, missing preview validation focus, misleading validation messages and an inert motion control in fallback mode. A fresh review identified stale preview history markers after reload or invalid Forward navigation; both paths were reproduced before their fix. Cross-browser testing also exposed frame-delta clamping that stretched the reveal on slow frames; a throttled-frame regression failed before the clamp was removed. The final complete suite passed after these changes. WebKit clipboard permissions are configured for that browser rather than reusing Chromium's permission names.
+The 19 November run used existing dependencies matching the lockfile. A fresh registry-backed `npm ci` attempt in a separate directory hit an access error, and the advisory audit endpoint was unavailable in this environment. The earlier 5 November run recorded a successful clean install and an audit with zero reported vulnerabilities. The 19 November results give no updated advisory status.
 
-These are Chromium, WebKit and local-source results. They do not certify physical-phone frame rates, battery consumption, actual iOS Safari behavior or every messaging app's long-link handling. Source and remote workflow results are available at [SHUBHRAGHAVT-57/Gift-for-Soemeone](https://github.com/SHUBHRAGHAVT-57/Gift-for-Soemeone). Pages deployment is manually triggered; the website address is [For You](https://shubhraghavt-57.github.io/Gift-for-Soemeone/). The deployment result and a live-browser check must be verified independently of these local results.
+The browser, touch and graphics checks were automated. Physical-phone frame rates and battery use, native iOS Safari and share sheet behavior, screen-reader output, and third-party handling of long links remain unverified. GitHub Actions and the published site require separate verification for this revision. The existing Pages URL is [For You](https://shubhraghavt-57.github.io/Gift-for-Soemeone/).

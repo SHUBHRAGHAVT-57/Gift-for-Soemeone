@@ -8,13 +8,13 @@ export default defineConfig({
   reporter: "list",
   timeout: 30000,
   use: {
-    baseURL: "http://127.0.0.1:4174/Gift-for-Soemeone/",
+    baseURL: "http://127.0.0.1:4403/Gift-for-Soemeone/",
     trace: "retain-on-failure",
   },
   webServer: {
     command:
-      "npm run preview -- --port 4174 --strictPort --base /Gift-for-Soemeone/",
-    url: "http://127.0.0.1:4174/Gift-for-Soemeone/",
+      "npm run preview -- --port 4403 --strictPort --base /Gift-for-Soemeone/",
+    url: "http://127.0.0.1:4403/Gift-for-Soemeone/",
     reuseExistingServer: !process.env.CI,
   },
   projects: [

@@ -2,6 +2,7 @@
   "name": "for-you",
   "private": true,
   "version": "1.0.0",
+  "license": "MIT",
   "type": "module",
   "description": "A little universe for someone you love. Create and share a personal particle rose or diamond ring.",
   "scripts": {
@@ -9,6 +10,7 @@
     "build": "tsc --noEmit && vite build --configLoader native",
     "preview": "vite preview --configLoader native --host 127.0.0.1",
     "test": "node --experimental-strip-types --test tests/gift.test.ts tests/shapes.test.ts",
+    "capture:evidence": "node scripts/capture-evidence.mjs",
     "test:e2e": "npm run build && playwright test"
   },
   "engines": {

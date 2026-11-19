@@ -1,0 +1,147 @@
+{
+  "capturedAt": "2026-11-19T09:40:22.343Z",
+  "sampleContent": "Synthetic demo only",
+  "captures": [
+    {
+      "name": "desktop-chromium-creator",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "contentWidth": 1440,
+      "renderer": "webgl",
+      "motion": "reduced"
+    },
+    {
+      "name": "desktop-chromium-share",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "contentWidth": 1440,
+      "renderer": "webgl",
+      "motion": "reduced"
+    },
+    {
+      "name": "desktop-chromium-keyboard-preview",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "contentWidth": 1440,
+      "renderer": "webgl",
+      "motion": "reduced"
+    },
+    {
+      "name": "desktop-chromium-reveal",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "contentWidth": 1440,
+      "renderer": "webgl",
+      "motion": "reduced"
+    },
+    {
+      "name": "desktop-chromium-ring",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "contentWidth": 1440,
+      "renderer": "webgl",
+      "motion": "reduced"
+    },
+    {
+      "name": "desktop-chromium-fallback",
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      },
+      "contentWidth": 1440,
+      "renderer": "fallback",
+      "motion": "reduced"
+    },
+    {
+      "name": "phone-webkit-creator",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "contentWidth": 390,
+      "renderer": "webgl",
+      "motion": "reduced"
+    },
+    {
+      "name": "phone-webkit-share",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "contentWidth": 390,
+      "renderer": "webgl",
+      "motion": "reduced"
+    },
+    {
+      "name": "phone-webkit-keyboard-preview",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "contentWidth": 390,
+      "renderer": "webgl",
+      "motion": "reduced"
+    },
+    {
+      "name": "phone-webkit-reveal",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "contentWidth": 390,
+      "renderer": "webgl",
+      "motion": "reduced"
+    },
+    {
+      "name": "phone-webkit-ring",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "contentWidth": 390,
+      "renderer": "webgl",
+      "motion": "reduced"
+    },
+    {
+      "name": "phone-webkit-fallback",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "contentWidth": 390,
+      "renderer": "fallback",
+      "motion": "reduced"
+    }
+  ],
+  "origins": [
+    "http://127.0.0.1:4403"
+  ],
+  "pageErrors": [],
+  "assets": [
+    {
+      "name": "index-CeSCYNo3.css",
+      "bytes": 17205,
+      "gzipBytes": 4749
+    },
+    {
+      "name": "index-Ct_HpZVd.js",
+      "bytes": 22015,
+      "gzipBytes": 7363
+    },
+    {
+      "name": "scene-DePEW6Co.js",
+      "bytes": 473665,
+      "gzipBytes": 119458
+    }
+  ]
+}
