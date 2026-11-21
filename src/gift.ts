@@ -1,26 +1,53 @@
 export type Theme = "rose" | "ring";
-export interface Gift {
-  v: 1;
+interface Message {
   to: string;
   from: string;
   note: string;
   theme: Theme;
 }
+export type Gift = Message & ({ v: 1 } | { v: 2; photos: Photo[] });
+export type Keepsake = Extract<Gift, { v: 2 }>;
+export interface Photo {
+  image: string;
+  caption: string;
+}
+export const PHOTO_LIMIT = 10;
+export const LETTER_LIMIT = 4000;
+export const LINK_LIMIT = 96000;
 
-const MAX_PAYLOAD = 16000;
-const fields = ["v", "to", "from", "note", "theme"];
+function validatePhotos(value: unknown): Photo[] {
+  if (!Array.isArray(value) || value.length > PHOTO_LIMIT)
+    throw new Error(`Choose up to ${PHOTO_LIMIT} photos.`);
+  return value.map((photo) => {
+    if (
+      !photo ||
+      typeof photo.image !== "string" ||
+      photo.image.length > 850000 ||
+      !/^data:image\/jpeg;base64,\/9j\/[a-zA-Z0-9+/]+=*$/u.test(photo.image) ||
+      typeof photo.caption !== "string" ||
+      [...photo.caption].length > 160
+    )
+      throw new Error("One of the album pages could not be read.");
+    return { image: photo.image, caption: photo.caption.trim() };
+  });
+}
 
 export function validateGift(value: unknown): Gift {
   if (!value || typeof value !== "object" || Array.isArray(value))
     throw new Error("This gift is not valid.");
   const data = value as Record<string, unknown>;
+  const fields = ["v", "to", "from", "note", "theme"];
+  if (data.v === 2) fields.push("photos");
   if (
     Object.keys(data).length !== fields.length ||
     fields.some((key) => !Object.hasOwn(data, key))
   ) {
     throw new Error("This gift has an unsupported format.");
   }
-  if (data.v !== 1 || (data.theme !== "rose" && data.theme !== "ring"))
+  if (
+    (data.v !== 1 && data.v !== 2) ||
+    (data.theme !== "rose" && data.theme !== "ring")
+  )
     throw new Error("This gift has an unsupported format.");
   const text = (key: string, limit: number) => {
     const raw = data[key];
@@ -40,10 +67,12 @@ export function validateGift(value: unknown): Gift {
     return normalized;
   };
   return {
-    v: 1,
+    ...(data.v === 1
+      ? { v: 1 as const }
+      : { v: 2 as const, photos: validatePhotos(data.photos) }),
     to: text("to", 60),
     from: text("from", 60),
-    note: text("note", 600),
+    note: text("note", data.v === 1 ? 600 : LETTER_LIMIT),
     theme: data.theme,
   };
 }
@@ -61,7 +90,7 @@ export function encodeGift(gift: Gift): string {
 
 export function decodeGift(fragment: string): Gift {
   const payload = fragment.replace(/^#/u, "");
-  if (!payload.startsWith("gift=") || payload.length > MAX_PAYLOAD)
+  if (!payload.startsWith("gift=") || payload.length > LINK_LIMIT)
     throw new Error("This gift link is incomplete or too long.");
   const encoded = payload.slice(5);
   if (!/^[A-Za-z0-9_-]+$/u.test(encoded) || encoded.length % 4 === 1)
@@ -85,5 +114,7 @@ export function giftUrl(gift: Gift, base: string): string {
     throw new Error("Open the website over HTTP or HTTPS before sharing.");
   url.search = "";
   url.hash = encodeGift(gift);
+  if (url.hash.length > LINK_LIMIT)
+    throw new Error("This album needs a smaller link or a gift file.");
   return url.href;
 }

@@ -8,3 +8,10 @@ playwright-report/
 !.env.example
 *.local
 CONTINUE.md
+
+# Personal content belongs in the creator, outside source control.
+*.private.*
+private-memories/
+private-albums/
+a-gift-for-you*.html
+debug.log

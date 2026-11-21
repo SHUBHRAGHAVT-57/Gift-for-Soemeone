@@ -1,0 +1,353 @@
+gift-reader {
+  display: block;
+  position: relative;
+  isolation: isolate;
+  background: #100d12;
+  color: #f7eee4;
+  font:
+    15px/1.55 system-ui,
+    sans-serif;
+  text-align: center;
+  overflow-wrap: anywhere;
+  --reader-height: calc(100svh - 82px);
+}
+gift-reader *,
+gift-reader *::before,
+gift-reader *::after {
+  box-sizing: border-box;
+}
+gift-reader [hidden] {
+  display: none !important;
+}
+gift-reader section {
+  min-height: var(--reader-height);
+  padding: clamp(48px, 8vh, 92px) 6vw 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+gift-reader h1,
+gift-reader h2,
+gift-reader p,
+gift-reader figure {
+  margin: 0;
+}
+gift-reader h1,
+gift-reader h2 {
+  font:
+    normal clamp(39px, 5.8vw, 92px)/1.02 Georgia,
+    serif;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+gift-reader h1:focus,
+gift-reader h2:focus {
+  outline: none;
+}
+gift-reader h2 {
+  font-size: clamp(36px, 4.7vw, 70px);
+}
+gift-reader .reader-label {
+  font:
+    600 10px/1.6 system-ui,
+    sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #e6beae;
+}
+gift-reader .reader-cover {
+  background:
+    linear-gradient(
+      180deg,
+      #100b12b8 0%,
+      #100b1270 46%,
+      #120f1338 68%,
+      #120f13bb
+    ),
+    var(--garden-wide) center/cover;
+  justify-content: flex-start;
+}
+gift-reader .cover-type {
+  padding-top: clamp(22px, 8vh, 94px);
+  max-width: min(100%, 21em);
+  font-size: clamp(28px, 4vw, 64px);
+}
+gift-reader .cover-type h1 {
+  margin: 0.22em 0 0.43em;
+  text-shadow: 0 2px 34px #120b16;
+}
+gift-reader button {
+  font: inherit;
+  cursor: pointer;
+  color: inherit;
+}
+gift-reader .reader-button {
+  background: #f6ecdf;
+  border: 1px solid #f6ecdf;
+  color: #37212c;
+  border-radius: 999px;
+  padding: 14px 22px;
+  font:
+    600 13px/1.35 system-ui,
+    sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 22px;
+}
+gift-reader button:focus-visible {
+  outline: 3px solid #ec8fab;
+  outline-offset: 4px;
+}
+gift-reader .reader-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  position: relative;
+  margin-top: -60px;
+  min-height: 60px;
+  padding: 0 max(18px, 5vw);
+  font:
+    12px/1.4 system-ui,
+    sans-serif;
+  background: #100d12d9;
+  color: #e1cfd0;
+}
+gift-reader .reader-nav button,
+gift-reader .book-controls button {
+  background: transparent;
+  border: 0;
+  font: inherit;
+  min-height: 44px;
+  padding: 8px 12px;
+}
+gift-reader button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+gift-reader .reader-light {
+  background: radial-gradient(
+    ellipse at 50% 54%,
+    #321823 0,
+    #160e16 36%,
+    #0d0c11 72%
+  );
+}
+gift-reader .heart-stage {
+  width: min(100%, 520px);
+  aspect-ratio: 520/370;
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+gift-reader .heart-stage canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+gift-reader .heart-stage span {
+  position: absolute;
+  color: #e98ba8;
+  font:
+    10rem Georgia,
+    serif;
+}
+gift-reader .reader-album {
+  background: radial-gradient(ellipse at 50% 48%, #473039, #1d151a 65%);
+  gap: 16px;
+}
+gift-reader .book-binding {
+  width: min(820px, 100%);
+  perspective: 1200px;
+  margin: 10px 0 4px;
+}
+gift-reader .book-spread {
+  padding: clamp(10px, 2vw, 22px);
+  display: grid;
+  grid-template-columns: 1fr 0.8fr;
+  gap: clamp(12px, 3vw, 36px);
+  align-items: center;
+  background: linear-gradient(
+    90deg,
+    #ecdeca,
+    #fbf1de 53%,
+    #cbbcaa 55%,
+    #f3e6d1 57%,
+    #f8eede
+  );
+  color: #4f3840;
+  border: 1px solid #b9a38d;
+  border-radius: 3px;
+  box-shadow:
+    0 4px 0 #beaa94,
+    0 7px 0 #e0d1bb,
+    0 20px 50px #08060b88;
+  min-height: 200px;
+}
+gift-reader .book-print {
+  aspect-ratio: 4/3;
+  background: #dfd0bb;
+  overflow: hidden;
+  border: 6px solid #fffaf1;
+  box-shadow: 0 2px 8px #40302b33;
+}
+gift-reader .book-print img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+gift-reader .book-print {
+  padding: 0;
+  cursor: zoom-in;
+}
+gift-reader .photo-dialog {
+  max-width: 95vw;
+  max-height: 94svh;
+  padding: 12px;
+  background: #1a1419;
+  color: #fff2e3;
+  border: 1px solid #ac8d7e;
+  text-align: right;
+}
+gift-reader .photo-dialog::backdrop {
+  background: #100b12ed;
+}
+gift-reader .photo-dialog button {
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 10px 12px;
+}
+gift-reader .photo-dialog img {
+  display: block;
+  max-width: 100%;
+  max-height: 76svh;
+  object-fit: contain;
+  margin: auto;
+}
+gift-reader figcaption {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+gift-reader figcaption .reader-label {
+  color: #79604f;
+}
+gift-reader figcaption p {
+  font:
+    italic clamp(17px, 2.4vw, 34px)/1.35 Georgia,
+    serif;
+  white-space: pre-line;
+}
+gift-reader figcaption small {
+  color: #775c54;
+  font:
+    11px system-ui,
+    sans-serif;
+}
+gift-reader .book-floret {
+  font:
+    48px Georgia,
+    serif;
+  color: #9f7964;
+}
+gift-reader .book-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font:
+    12px/1.5 system-ui,
+    sans-serif;
+}
+gift-reader .book-controls button {
+  font-size: 20px;
+}
+gift-reader .reader-words {
+  background: radial-gradient(ellipse at 50% 30%, #38212b, #110e14 80%);
+}
+gift-reader .reader-words h2 {
+  max-width: 22ch;
+  font-style: italic;
+  font-size: clamp(34px, 4vw, 64px);
+  white-space: pre-line;
+}
+gift-reader .reader-letter {
+  background: #241c22;
+  justify-content: flex-start;
+  gap: 26px;
+}
+gift-reader .letter-sheet {
+  text-align: left;
+  width: min(690px, 100%);
+  padding: clamp(28px, 5vw, 70px);
+  color: #493137;
+  background: #f4eade;
+  border-top: 3px double #bb9b85;
+  box-shadow: 0 12px 42px #100b1088;
+}
+gift-reader .letter-sheet .reader-label {
+  color: #7a584e;
+}
+gift-reader .letter-sheet h2 {
+  margin: 30px 0 22px;
+  font-style: italic;
+}
+gift-reader .written-note {
+  white-space: pre-wrap;
+  font:
+    clamp(19px, 2vw, 24px)/1.68 Georgia,
+    serif;
+}
+gift-reader .written-signature {
+  margin-top: 36px;
+  color: #8d4656;
+  font:
+    italic 24px/1.4 Georgia,
+    serif;
+}
+@media (max-width: 620px) {
+  gift-reader .reader-cover {
+    background-image:
+      linear-gradient(#100b1260, #100b1250 58%, #120f1380), var(--garden-tall);
+    background-position: center;
+  }
+  gift-reader section {
+    padding-inline: 20px;
+  }
+  gift-reader .book-spread {
+    grid-template-columns: 1fr;
+    gap: 0;
+    background: #f6ead7;
+  }
+  gift-reader figcaption {
+    gap: 5px;
+    padding: 12px 4px 3px;
+  }
+  gift-reader .book-floret {
+    display: none;
+  }
+  gift-reader .cover-type {
+    padding-top: 5vh;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  gift-reader[data-ready]:not([data-paused]) .book-spread:not([hidden]) {
+    animation: turn-leaf 350ms ease-out both;
+    transform-origin: left center;
+  }
+  @keyframes turn-leaf {
+    from {
+      opacity: 0.35;
+      transform: rotateY(-8deg);
+    }
+    to {
+      opacity: 1;
+      transform: rotateY(0);
+    }
+  }
+}

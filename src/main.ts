@@ -1,9 +1,15 @@
 import "./style.css";
-import { decodeGift, giftUrl, validateGift } from "./gift";
-import type { Gift, Theme } from "./gift";
+import { decodeGift, LETTER_LIMIT, validateGift } from "./gift";
+import type { Gift, Keepsake, Photo, Theme } from "./gift";
 import { arrow, fallbackArt, flowerMark } from "./art";
 import type { Sculpture, SceneState } from "./scene";
 
+import { mountAlbumEditor } from "./album-editor";
+import { compactGiftUrl } from "./photos";
+import { giftFile, readerMarkup } from "./reader";
+import "./studio.css";
+
+const photos: Photo[] = [];
 const app = document.querySelector<HTMLDivElement>("#app")!;
 let scene: Sculpture | undefined;
 let sceneToken = 0;
@@ -80,6 +86,7 @@ function wireHeader() {
   $(".motion-button").addEventListener("click", () => {
     paused = !paused;
     scene?.setPaused(paused);
+    app.querySelector("gift-reader")?.toggleAttribute("data-paused", paused);
     $(".motion-button").setAttribute("aria-pressed", String(paused));
     $(".motion-button").setAttribute(
       "aria-label",
@@ -106,38 +113,30 @@ function renderCreator(focusPreview = false) {
   ++renderToken;
   clearScene();
   view = "creator";
-  document.title = "For You — a little universe, just for them";
+  document.title = "For You · The gift studio";
   app.innerHTML = /* HTML */ `${header()}
     <main id="main">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <p class="intro">For your favorite person</p>
-          <h1 id="hero-title">A little universe.<br />Just for them.</h1>
+          <p class="intro">The gift studio</p>
+          <h1 id="hero-title">A garden for<br /><em>the two of you.</em></h1>
           <p class="hero-description">
-            Some feelings deserve more than a text.<br />Give yours a little
-            room to bloom.
+            Give them a place to open your photos and read a letter in your own
+            words.
           </p>
           <a class="button button-light hero-cta" href="#compose"
-            >Make something beautiful ${arrow}</a
+            >Create a free gift ${arrow}</a
           >
-          <p class="hero-footnote">Your words. A little wonder. One link.</p>
         </div>
         <div class="hero-art">
           ${stage(draft.theme)}
           <div class="art-caption">
             <span class="caption-line"></span>
             <p id="art-caption">
-              ${draft.theme === "rose" ? "A rose, made of light." : "A promise, written in stardust."}
+              ${draft.theme === "rose" ? "The rose garden" : "The promise ring"}
             </p>
             <span class="caption-line"></span>
           </div>
-          <p class="art-detail">Made to be opened by someone special</p>
-        </div>
-        <div class="hero-bottom">
-          <span>A small gesture can mean everything.</span
-          ><a href="#compose"
-            >Put your heart into it <span aria-hidden="true">↓</span></a
-          >
         </div>
       </section>
       <section
@@ -146,19 +145,15 @@ function renderCreator(focusPreview = false) {
         aria-labelledby="compose-title"
       >
         <div class="compose-intro">
-          <span class="little-flower" aria-hidden="true">✳</span>
-          <h2 id="compose-title">Make it<br />theirs.</h2>
+          <p class="studio-label">Your gift</p>
+          <h2 id="compose-title">Inside the<br /><em>envelope.</em></h2>
           <p>
-            A name. A few honest words.<br />
-            A little magic to carry them.
+            Choose the opening, arrange your album and write the letter they’ll
+            find at the end.
           </p>
-          <div class="how-it-works">
-            <h3>From your heart to their screen</h3>
-            <ol>
-              <li>Choose a little wonder.</li>
-              <li>Add the words only you could write.</li>
-              <li>Send a link. Let them open it.</li>
-            </ol>
+          <div class="chapter-list" aria-label="Recipient chapters">
+            <span>The garden</span><span>A heart of light</span
+            ><span>Your photographs</span><span>The letter</span>
           </div>
         </div>
         <form id="gift-form">
@@ -213,7 +208,7 @@ function renderCreator(focusPreview = false) {
                 id="recipient"
                 name="to"
                 autocomplete="off"
-                placeholder="Your favorite person"
+                placeholder="Their first name"
                 required
                 aria-describedby="name-hint"
               />
@@ -223,8 +218,8 @@ function renderCreator(focusPreview = false) {
               ><input
                 id="sender"
                 name="from"
-                autocomplete="given-name"
-                placeholder="The one who loves them"
+                autocomplete="off"
+                placeholder="Your signature"
                 required
                 aria-describedby="name-hint"
               />
@@ -233,18 +228,35 @@ function renderCreator(focusPreview = false) {
           <span class="sr-only" id="name-hint"
             >Up to 60 characters per name.</span
           >
+          <fieldset class="album-field">
+            <legend>Your photo album <small>Optional</small></legend>
+            <p id="photo-hint">
+              Choose up to 10 photos in reading order. JPG, PNG or WebP, up to
+              12 MB each.
+            </p>
+            <label class="file-picker" for="album-files"
+              >Add photos<input
+                id="album-files"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                aria-describedby="photo-hint"
+            /></label>
+            <p id="album-feedback" aria-live="polite"></p>
+            <ol id="album-pages"></ol>
+          </fieldset>
           <div class="field note-field">
             <label for="note"
-              >Your note <span>Make it sound like you.</span></label
+              >Your letter <span>Up to 4,000 characters</span></label
             ><textarea
               id="note"
               name="note"
               rows="5"
-              placeholder="I don't say it enough, but life is a little softer, a little brighter, and a lot more beautiful with you in it."
+              placeholder="What’s one moment with them you still think about?"
               required
               aria-describedby="note-count"
             ></textarea
-            ><span class="note-count" id="note-count">0 / 600</span>
+            ><span class="note-count" id="note-count">0 / 4000</span>
           </div>
           <p class="form-error" id="form-error" role="alert" hidden></p>
           <div class="form-actions">
@@ -286,6 +298,14 @@ function renderCreator(focusPreview = false) {
               </button>
             </div>
           </div>
+          <button class="file-save" id="save-gift" type="button">
+            Download full-size gift
+          </button>
+          <p class="send-hint">
+            Links use smaller photos and can be long. For a full-size album,
+            send the downloaded HTML file as a document and open it in a
+            browser.
+          </p>
           <p class="share-status" role="status" aria-live="polite"></p>
           <p class="privacy-note">
             <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -301,36 +321,37 @@ function renderCreator(focusPreview = false) {
                 d="M5.5 7V4.5a2.5 2.5 0 0 1 5 0V7"
                 stroke="currentColor"
               /></svg
-            >No account needed. Anyone with the link can read your gift.
+            >Free to create. Your photos stay in this tab until you share.
+            Anyone with the link or file can open it.
           </p>
         </form>
-      </section>
-      <section class="closing">
-        <p>Not every beautiful thing needs an occasion.</p>
-        <span>Sometimes, “I thought of you” is enough.</span>
       </section>
     </main>
     <footer>
       <a class="footer-brand" href="#main">for you.</a
-      ><span>A little code. A lot of feeling.</span
-      ><a href="#compose">Make their day ${arrow}</a>
+      ><a href="#compose">Create a gift ${arrow}</a>
     </footer>`;
   $("#recipient").setAttribute("value", draft.to);
   $("#sender").setAttribute("value", draft.from);
   $<HTMLTextAreaElement>("#note").value = draft.note;
-  $("#note-count").textContent = `${[...draft.note].length} / 600`;
+  $("#note-count").textContent = `${[...draft.note].length} / 4000`;
   wireHeader();
   void mountScene(draft.theme, "display");
   const form = $<HTMLFormElement>("#gift-form");
-  form.addEventListener("input", () => {
+  const invalidateShare = () => {
     ++renderToken;
-    readDraft();
     $("#share-result").hidden = true;
+    $<HTMLInputElement>("#gift-link").value = "";
     $(".share-status").textContent = "";
+  };
+  mountAlbumEditor(form, photos, invalidateShare);
+  form.addEventListener("input", () => {
+    invalidateShare();
+    readDraft();
     $("#form-error").hidden = true;
     const count = [...draft.note].length;
-    $("#note-count").textContent = `${count} / 600`;
-    $("#note-count").classList.toggle("over-limit", count > 600);
+    $("#note-count").textContent = `${count} / 4000`;
+    $("#note-count").classList.toggle("over-limit", count > LETTER_LIMIT);
   });
   form.addEventListener("change", (event) => {
     if ((event.target as HTMLInputElement).name !== "theme") return;
@@ -341,9 +362,7 @@ function renderCreator(focusPreview = false) {
     host.dataset.renderer = "loading";
     host.innerHTML = fallbackArt(draft.theme);
     $("#art-caption").textContent =
-      draft.theme === "rose"
-        ? "A rose, made of light."
-        : "A promise, written in stardust.";
+      draft.theme === "rose" ? "The rose garden" : "The promise ring";
     void mountScene(draft.theme, "display");
   });
   $("#preview").addEventListener("click", () => {
@@ -361,26 +380,33 @@ function renderCreator(focusPreview = false) {
   $(".copy-again").addEventListener("click", () => {
     void shareLink();
   });
-  if (navigator.share) {
+  $("#save-gift").addEventListener("click", async () => {
+    const gift = validatedDraft();
+    if (!gift) return;
+    const token = renderToken;
+    try {
+      const file = await giftFile(gift);
+      if (token !== renderToken) return;
+      const url = URL.createObjectURL(file);
+      const download = document.createElement("a");
+      download.href = url;
+      download.download = file.name;
+      document.body.append(download);
+      download.click();
+      download.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      $(".share-status").textContent =
+        "Gift saved. Send the HTML document to your person.";
+    } catch {
+      if (token === renderToken)
+        $(".share-status").textContent =
+          "Could not save the gift. Please try again.";
+    }
+  });
+  if (typeof navigator.share === "function") {
     $("#native-share").hidden = false;
-    $("#native-share").addEventListener("click", async () => {
-      const gift = validatedDraft();
-      if (!gift) return;
-      const token = renderToken;
-      try {
-        await navigator.share({
-          title: "Something made just for you",
-          url: giftUrl(gift, location.href),
-        });
-      } catch (error) {
-        if (
-          token === renderToken &&
-          !(error instanceof DOMException && error.name === "AbortError")
-        ) {
-          $(".share-status").textContent =
-            "Sharing is unavailable. Create a gift link to copy instead.";
-        }
-      }
+    $("#native-share").addEventListener("click", () => {
+      void shareLink(true);
     });
   }
   if (focusPreview) {
@@ -398,13 +424,14 @@ function readDraft() {
   };
 }
 
-function validatedDraft(): Gift | undefined {
+function validatedDraft(): Keepsake | undefined {
+  if ($("#gift-form").getAttribute("aria-busy") === "true") return;
   if (!$<HTMLFormElement>("#gift-form").reportValidity()) return undefined;
   readDraft();
   try {
-    const gift = validateGift({ v: 1, ...draft });
+    const gift = validateGift({ v: 2, ...draft, photos });
     $("#form-error").hidden = true;
-    return gift;
+    return gift.v === 2 ? gift : undefined;
   } catch (error) {
     $("#form-error").textContent =
       error instanceof Error
@@ -415,11 +442,32 @@ function validatedDraft(): Gift | undefined {
   }
 }
 
-async function shareLink() {
+async function shareLink(native = false) {
   const gift = validatedDraft();
   if (!gift) return;
-  const url = giftUrl(gift, location.href);
   const token = renderToken;
+  let url: string;
+  try {
+    url = await compactGiftUrl(gift, location.href);
+  } catch {
+    if (token === renderToken)
+      $(".share-status").textContent =
+        "Could not prepare a link. Download the full-size gift instead.";
+    return;
+  }
+  if (token !== renderToken) return;
+  if (native) {
+    try {
+      await navigator.share({ title: "A gift for you", url });
+      return;
+    } catch (error) {
+      if (
+        token !== renderToken ||
+        (error instanceof DOMException && error.name === "AbortError")
+      )
+        return;
+    }
+  }
   const field = $<HTMLInputElement>("#gift-link");
   field.value = url;
   $("#share-result").hidden = false;
@@ -442,6 +490,17 @@ function renderRecipient(gift: Gift, preview = false) {
   clearScene();
   view = preview ? "preview" : "gift";
   document.title = "For You — someone made you a little universe";
+  if (gift.v === 2) {
+    app.innerHTML = `${header(true)}<main id="main" class="keepsake">
+    ${preview ? '<div class="preview-tools"><button class="back-button" type="button">← Back to editing</button><span>Recipient preview</span></div>' : ""}
+    ${readerMarkup(gift)}</main>`;
+    wireHeader();
+    app.querySelector("gift-reader")?.toggleAttribute("data-paused", paused);
+    if (preview)
+      $(".back-button").addEventListener("click", () => history.back());
+    $("gift-reader h1").focus({ preventScroll: true });
+    return;
+  }
   app.innerHTML = /* HTML */ `${header(true)}
     <main class="recipient" id="main">
       <div class="recipient-top">
@@ -551,7 +610,7 @@ window.addEventListener("hashchange", () => {
 window.addEventListener("popstate", (event) => {
   if (event.state?.preview === true) {
     try {
-      renderRecipient(validateGift({ v: 1, ...draft }), true);
+      renderRecipient(validateGift({ v: 2, ...draft, photos }), true);
     } catch {
       route();
     }
