@@ -12,7 +12,7 @@ const gift = {
 async function fillGift(page: import("@playwright/test").Page) {
   await page.getByLabel("Their name").fill(gift.to);
   await page.getByLabel("Your name").fill(gift.from);
-  await page.getByLabel("Your note").fill(gift.note);
+  await page.getByLabel("Your letter").fill(gift.note);
 }
 
 test("creator previews a gift, reveals its note and preserves the draft on return", async ({
@@ -26,13 +26,14 @@ test("creator previews a gift, reveals its note and preserves the draft on retur
   ).toBeVisible();
   await expect(page.getByText(gift.note, { exact: true })).toBeHidden();
   await page.getByRole("button", { name: "Open your gift" }).click();
+  await page.getByRole("button", { name: "Read your letter" }).click();
   await expect(page.getByText(gift.note, { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Replay the reveal" }).click();
   await expect(
     page.getByRole("button", { name: "Open your gift" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Back to editing" }).click();
-  await expect(page.getByLabel("Your note")).toHaveValue(gift.note);
+  await expect(page.getByLabel("Your letter")).toHaveValue(gift.note);
   await expect(
     page.getByRole("button", { name: "Preview gift" }),
   ).toBeFocused();
@@ -116,7 +117,7 @@ test("theme changes update the scene and the generated gift", async ({
     /diamond ring/,
   );
   await page.getByRole("button", { name: "Preview gift" }).click();
-  await expect(page.locator(".sculpture")).toHaveAttribute(
+  await expect(page.locator("gift-reader")).toHaveAttribute(
     "data-theme",
     "ring",
   );
@@ -195,6 +196,7 @@ test("narrow layouts stay within the viewport", async ({ page }) => {
   await fillGift(page);
   await page.getByRole("button", { name: "Preview gift" }).click();
   await page.getByRole("button", { name: "Open your gift" }).click();
+  await page.getByRole("button", { name: "Read your letter" }).click();
   await expect(page.getByText(gift.note, { exact: true })).toBeVisible();
   expect(
     await page.evaluate(
@@ -396,6 +398,7 @@ test("a copied production link preserves the repository path and opens the inten
   const recipient = await context.newPage();
   await recipient.goto(link);
   await recipient.getByRole("button", { name: "Open your gift" }).click();
+  await recipient.getByRole("button", { name: "Read your letter" }).click();
   await expect(recipient.getByText(gift.note, { exact: true })).toBeVisible();
   await expect(recipient.getByLabel("Their name")).toHaveCount(0);
 });
@@ -413,7 +416,7 @@ test("Back from a damaged gift restores the creator and its draft", async ({
   ).toBeVisible();
   await page.goBack();
   await expect(page.getByLabel("Their name")).toHaveValue(gift.to);
-  await expect(page.getByLabel("Your note")).toHaveValue(gift.note);
+  await expect(page.getByLabel("Your letter")).toHaveValue(gift.note);
 });
 
 test("browser Back and Forward navigate preview without losing the draft", async ({
@@ -423,7 +426,7 @@ test("browser Back and Forward navigate preview without losing the draft", async
   await fillGift(page);
   await page.getByRole("button", { name: "Preview gift" }).click();
   await page.goBack();
-  await expect(page.getByLabel("Your note")).toHaveValue(gift.note);
+  await expect(page.getByLabel("Your letter")).toHaveValue(gift.note);
   await expect(
     page.getByRole("button", { name: "Preview gift" }),
   ).toBeFocused();
@@ -476,6 +479,7 @@ test("touch users can preview, open, replay and return to their note", async ({
     await fillGift(page);
     await page.getByRole("button", { name: "Preview gift" }).tap();
     await page.getByRole("button", { name: "Open your gift" }).tap();
+    await page.getByRole("button", { name: "Read your letter" }).tap();
     await expect(page.getByText(gift.note, { exact: true })).toBeVisible();
     expect(
       await page.evaluate(
@@ -487,7 +491,7 @@ test("touch users can preview, open, replay and return to their note", async ({
       page.getByRole("button", { name: "Open your gift" }),
     ).toBeVisible();
     await page.getByRole("button", { name: "Back to editing" }).tap();
-    await expect(page.getByLabel("Your note")).toHaveValue(gift.note);
+    await expect(page.getByLabel("Your letter")).toHaveValue(gift.note);
   } finally {
     await context.close();
   }
@@ -503,7 +507,7 @@ test("reloading a preview does not trap the next preview in browser history", as
   await fillGift(page);
   await page.getByRole("button", { name: "Preview gift" }).click();
   await page.getByRole("button", { name: "Back to editing" }).click();
-  await expect(page.getByLabel("Your note")).toHaveValue(gift.note);
+  await expect(page.getByLabel("Your letter")).toHaveValue(gift.note);
 });
 
 test("invalid Forward preview recovers without leaving a stale history marker", async ({
@@ -513,13 +517,13 @@ test("invalid Forward preview recovers without leaving a stale history marker", 
   await fillGift(page);
   await page.getByRole("button", { name: "Preview gift" }).click();
   await page.getByRole("button", { name: "Back to editing" }).click();
-  await page.getByLabel("Your note").fill("");
+  await page.getByLabel("Your letter").fill("");
   await page.goForward();
-  await expect(page.getByLabel("Your note")).toHaveValue("");
-  await page.getByLabel("Your note").fill(gift.note);
+  await expect(page.getByLabel("Your letter")).toHaveValue("");
+  await page.getByLabel("Your letter").fill(gift.note);
   await page.getByRole("button", { name: "Preview gift" }).click();
   await page.getByRole("button", { name: "Back to editing" }).click();
-  await expect(page.getByLabel("Your note")).toHaveValue(gift.note);
+  await expect(page.getByLabel("Your letter")).toHaveValue(gift.note);
 });
 
 test("the reveal completes on elapsed time when frames are slow", async ({

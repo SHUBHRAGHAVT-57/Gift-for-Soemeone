@@ -4,9 +4,9 @@ Status: approved and implemented, 5 November 2026.
 
 ## Intent and delivery
 
-Build a website someone can personalize and send to a girlfriend or partner. The user has specified GitHub as the destination for the project. Deliver ordinary source code, documentation, tests, and a reproducible build in its own repository. Make the output compatible with GitHub Pages. Repository creation, visibility, and enabling public hosting must be distinguished from preparing the code; the user has selected the public repository `SHUBHRAGHAVT-57/Gift-for-Soemeone` for source publication. Public Pages hosting remains a separate manual step.
+Build a website someone can personalize and send to a girlfriend or partner. The user has specified GitHub as the destination for the project. Deliver ordinary source code, documentation, tests, and a reproducible build in its own repository. Make the output compatible with GitHub Pages. Repository creation, visibility, and enabling public hosting must be distinguished from preparing the code; the user has selected the public repository `Gift-for-Soemeone` for source publication. Public Pages hosting remains a separate manual step.
 
-The user approved the reusable static creator. Product title: For You; source repository: `SHUBHRAGHAVT-57/Gift-for-Soemeone`.
+The user approved the reusable static creator. Product title: For You; source repository: `Gift-for-Soemeone`.
 
 ## Approaches and proposed choice
 
